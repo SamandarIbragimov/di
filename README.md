@@ -1,1 +1,2 @@
 # Dasturing Injiniring
+## Amonov Aminjon
