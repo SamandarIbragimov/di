@@ -1,1 +1,2 @@
 # Dasturing Injiniring
+Merajov Nurmuhammad 
