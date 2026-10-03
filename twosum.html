@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two Sum</title>
+<style>
+  :root {
+    --bg: #eef2f7;
+    --panel: #ffffff;
+    --ink: #14213d;
+    --muted: #5b6b86;
+    --line: #d5dce8;
+    --accent: #2563eb;
+    --hit: #16a34a;
+    --hit-bg: #dcfce7;
+    --miss-bg: #f1f5f9;
+    --err: #b91c1c;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f172a;
+      --panel: #1e293b;
+      --ink: #e8eefc;
+      --muted: #94a3b8;
+      --line: #334155;
+      --accent: #60a5fa;
+      --hit: #4ade80;
+      --hit-bg: #14532d;
+      --miss-bg: #0f172a;
+      --err: #f87171;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    padding: 32px 16px;
+  }
+  main { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
+  input {
+    width: 100%;
+    font: inherit;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--ink);
+  }
+  input:focus-visible, button:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .row { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 14px; }
+  @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+  button {
+    font: inherit;
+    font-weight: 600;
+    background: var(--accent);
+    color: #fff;
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 18px;
+    cursor: pointer;
+  }
+  button:hover { filter: brightness(1.1); }
+  .result { font-size: 1.25rem; font-weight: 700; margin: 0; }
+  .result.ok { color: var(--hit); }
+  .result.bad { color: var(--err); }
+  .hint { color: var(--muted); margin: 0; }
+  .cells { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+  .cell {
+    min-width: 56px;
+    text-align: center;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--miss-bg);
+  }
+  .cell small { display: block; color: var(--muted); font-size: 0.75rem; }
+  .cell b { font-size: 1.15rem; }
+  .cell.hit { background: var(--hit-bg); border-color: var(--hit); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 600; }
+  tr.found td { background: var(--hit-bg); font-weight: 600; }
+  .tablewrap { overflow-x: auto; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Two Sum</h1>
+  <p class="sub">Yig'indisi target ga teng bo'ladigan ikki sonning indekslarini toping.</p>
+
+  <section class="panel">
+    <div class="row">
+      <div>
+        <label for="massiv">Sonlar (vergul bilan)</label>
+        <input id="massiv" value="2,7,11,15" placeholder="2,7,11,15">
+      </div>
+      <div>
+        <label for="target">Target</label>
+        <input id="target" type="number" value="9">
+      </div>
+    </div>
+    <button id="btn" type="button">Hisoblash</button>
+  </section>
+
+  <section class="panel" aria-live="polite">
+    <p id="natija" class="hint">Natija shu yerda ko'rinadi.</p>
+    <div id="cells" class="cells"></div>
+  </section>
+
+  <section class="panel">
+    <label>Qadamlar</label>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>i</th><th>nums[i]</th><th>Kerak</th><th>Map da bormi?</th></tr>
+        </thead>
+        <tbody id="qadamlar">
+          <tr><td colspan="4" class="hint">Hisoblagandan keyin to'ldiriladi.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  function twoSum(nums, target) {
+    const korilgan = new Map();
+    const qadamlar = [];
+
+    for (let i = 0; i < nums.length; i++) {
+      const kerak = target - nums[i];
+      const bor = korilgan.has(kerak);
+      qadamlar.push({ i, qiymat: nums[i], kerak, bor });
+
+      if (bor) {
+        return { javob: [korilgan.get(kerak), i], qadamlar };
+      }
+      korilgan.set(nums[i], i);
+    }
+    return { javob: null, qadamlar };
+  }
+
+  function hisobla() {
+    const natija = document.getElementById("natija");
+    const cells = document.getElementById("cells");
+    const tbody = document.getElementById("qadamlar");
+
+    const matn = document.getElementById("massiv").value.trim();
+    const targetMatn = document.getElementById("target").value;
+    const nums = matn.split(",").map(s => Number(s.trim()));
+
+    cells.innerHTML = "";
+    tbody.innerHTML = "";
+
+    if (!matn || nums.some(Number.isNaN) || targetMatn === "") {
+      natija.className = "result bad";
+      natija.textContent = "Faqat sonlarni vergul bilan kiriting va targetni to'ldiring.";
+      return;
+    }
+
+    const { javob, qadamlar } = twoSum(nums, Number(targetMatn));
+
+    nums.forEach((n, i) => {
+      const d = document.createElement("div");
+      d.className = "cell" + (javob && javob.includes(i) ? " hit" : "");
+      d.innerHTML = "<small>" + i + "</small><b>" + n + "</b>";
+      cells.appendChild(d);
+    });
+
+    if (javob) {
+      natija.className = "result ok";
+      natija.textContent = "Javob: [" + javob.join(", ") + "]";
+    } else {
+      natija.className = "result bad";
+      natija.textContent = "Yechim topilmadi";
+    }
+
+    qadamlar.forEach((q, k) => {
+      const tr = document.createElement("tr");
+      if (javob && k === qadamlar.length - 1) tr.className = "found";
+      tr.innerHTML = "<td>" + q.i + "</td><td>" + q.qiymat + "</td><td>" +
+        q.kerak + "</td><td>" + (q.bor ? "Ha" : "Yo'q") + "</td>";
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById("btn").addEventListener("click", hisobla);
+  document.querySelectorAll("input").forEach(el =>
+    el.addEventListener("keydown", e => { if (e.key === "Enter") hisobla(); })
+  );
+</script>
+</body>
+</html>
